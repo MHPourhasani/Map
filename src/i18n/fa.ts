@@ -1,40 +1,24 @@
-/**
- * Persian (fa) message catalog — the default and currently only locale.
- *
- * Keys are flat strings so that new locales can simply provide a parallel
- * `Partial<Record<MessageKey, string>>` and fall back to Persian.
- * Placeholders use the `{name}` syntax and are replaced by `t(key, params)`.
- */
 export const fa = {
-    // --- App ---------------------------------------------------------------
     "app.title": "نقشه و مسیریاب",
     "app.tagline": "جستجو، مسیریابی و موقعیت فعلی",
     "map.regionLabel": "نقشه تعاملی ایران",
 
-    // --- Search panel ------------------------------------------------------
     "search.origin.label": "مبدأ",
     "search.origin.placeholder": "مبدأ را جستجو کنید",
     "search.destination.label": "مقصد",
     "search.destination.placeholder": "مقصد را جستجو کنید",
     "search.swap": "جابه‌جایی مبدأ و مقصد",
     "search.clear": "پاک کردن فیلد",
-    "search.openDropdown": "نمایش نتایج",
     "search.minChars": "برای جستجو حداقل ۲ حرف وارد کنید",
     "search.searching": "در حال جستجو…",
     "search.searchingHint": "در حال دریافت نتایج…",
     "search.empty": "نتیجه‌ای برای «{term}» پیدا نشد",
     "search.emptyHint": "عبارت دیگری امتحان کنید",
-    "search.error": "خطا در دریافت نتایج",
     "search.retry": "تلاش دوباره",
-    "search.resultCount": "{count} نتیجه",
     "search.useMyLocation": "موقعیت فعلی من",
     "search.useMyLocationAsOrigin": "استفاده از موقعیت فعلی به‌عنوان مبدأ",
     "search.listboxLabel": "نتایج جستجوی مکان",
 
-    // --- Route -------------------------------------------------------------
-    "route.needBothPoints": "برای محاسبه مسیر، مبدأ و مقصد را انتخاب کنید",
-    "route.needOrigin": "مبدأ را انتخاب کنید",
-    "route.needDestination": "مقصد را انتخاب کنید",
     "route.loading": "در حال محاسبه مسیر…",
     "route.distance": "مسافت",
     "route.duration": "زمان تقریبی",
@@ -46,20 +30,14 @@ export const fa = {
     "route.primary": "مسیر اصلی",
     "route.alternativeNumber": "مسیر {n}",
     "route.cardLabel": "خلاصه مسیر محاسبه‌شده",
-    "route.mode.driving": "خودرو",
     "route.attribution": "نقشه: OpenStreetMap · مسیریابی: نشان",
-    "route.from": "از {origin}",
-    "route.to": "به {destination}",
-    "route.emptyHint": "مسیری بین این دو نقطه برنگشت",
 
-    // --- Geolocation -------------------------------------------------------
     "geo.button": "موقعیت من",
     "geo.locating": "در حال دریافت موقعیت…",
     "geo.found": "موقعیت فعلی",
     "geo.accuracy": "دقت تقریبی: {meters} متر",
     "geo.setOrigin": "تنظیم به‌عنوان مبدأ",
     "geo.close": "بستن",
-    "geo.dismiss": "بستن پیام",
     "geo.error.permission_denied": "دسترسی به موقعیت مکانی رد شد؛ از تنظیمات مرورگر مجاز کنید",
     "geo.error.unavailable": "موقعیت مکانی در دسترس نیست",
     "geo.error.timeout": "دریافت موقعیت بیش از حد طول کشید؛ دوباره تلاش کنید",
@@ -67,7 +45,6 @@ export const fa = {
     "geo.error.insecure": "موقعیت‌یابی فقط روی HTTPS یا localhost فعال است",
     "geo.error.unknown": "خطا در دریافت موقعیت مکانی",
 
-    // --- Map controls ------------------------------------------------------
     "controls.group": "کنترل‌های نقشه",
     "controls.zoomIn": "بزرگ‌نمایی",
     "controls.zoomOut": "کوچک‌نمایی",
@@ -82,7 +59,6 @@ export const fa = {
     "controls.expand": "نمایش کنترل‌های بیشتر",
     "controls.collapse": "بستن کنترل‌ها",
 
-    // --- Status / errors ---------------------------------------------------
     "status.mapLoading": "در حال بارگذاری نقشه…",
     "status.mapError.title": "نقشه بارگذاری نشد",
     "status.mapError.body": "اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.",
@@ -100,7 +76,6 @@ export const fa = {
     "error.timeout": "پاسخ سرویس بیش از حد طول کشید",
     "error.unknown": "خطای ناشناخته؛ دوباره تلاش کنید",
 
-    // --- Auth (login) ------------------------------------------------------
     "auth.title": "ورود به حساب",
     "auth.subtitle": "برای مشاهده نقشه وارد شوید",
     "auth.username": "نام کاربری",
@@ -114,17 +89,10 @@ export const fa = {
     "auth.logout": "خروج",
     "auth.loggedInAs": "وارد شده به‌عنوان {username}",
 
-    // --- Access levels ---------------------------------------------------------
-    "access.title": "سطح دسترسی",
-    "access.current": "سطح فعلی: {level}",
     "access.level.basic": "پایه",
     "access.level.standard": "استاندارد",
     "access.level.vip": "VIP",
-    "access.desc.basic": "نقشه و انتخاب مبدأ و مقصد",
-    "access.desc.standard": "امکانات پایه + موقعیت فعلی و کنترل‌های نقشه",
-    "access.desc.vip": "همه امکانات + جزئیات کامل مبدأ، مقصد و مسیر",
 
-    // --- Endpoint details (VIP) ---------------------------------------------
     "details.title": "جزئیات مبدأ و مقصد",
     "details.name": "نام",
     "details.address": "نشانی",
@@ -134,7 +102,6 @@ export const fa = {
     "details.lng": "طول جغرافیایی",
     "details.lat": "عرض جغرافیایی",
 
-    // --- Legs & steps (VIP) ---------------------------------------------------
     "legs.title": "بخش‌ها و گام‌های مسیر",
     "legs.leg": "بخش {n}",
     "legs.stepsCount": "{count} گام",
@@ -158,7 +125,6 @@ export const fa = {
     "step.showOnMap": "نمایش روی نقشه",
     "step.expand": "جزئیات گام",
 
-    // --- Maneuver labels ----------------------------------------------------
     "maneuver.type.depart": "شروع حرکت",
     "maneuver.type.turn": "پیچ",
     "maneuver.type.new name": "تغییر نام معبر",
@@ -181,7 +147,6 @@ export const fa = {
     "maneuver.modifier.sharp right": "تند به راست",
     "maneuver.modifier.uturn": "دور برگردان",
 
-    // --- Units / formatting ------------------------------------------------
     "unit.km": "کیلومتر",
     "unit.m": "متر",
     "unit.hour": "ساعت",

@@ -39,9 +39,6 @@
     }
 }
 
-/* ------------------------------------------------------------------ *
- * Shell & full-screen map
- * ------------------------------------------------------------------ */
 .pm-shell {
     position: fixed;
     inset: 0;
@@ -56,7 +53,6 @@
     height: 100%;
 }
 
-/* Glassmorphism surface shared by every floating panel. */
 .glass {
     background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(18px) saturate(1.5);
@@ -68,9 +64,6 @@
     border-radius: 1rem;
 }
 
-/* ------------------------------------------------------------------ *
- * Floating icon buttons & control group
- * ------------------------------------------------------------------ */
 .pm-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -112,8 +105,6 @@
     background: rgba(148, 163, 184, 0.35);
 }
 
-/* Roomier tap targets on touch devices, scoped to the controls cluster so the
-   sizing of the other floating buttons (e.g. location) stays unchanged. */
 @media (pointer: coarse) {
     .pm-area--controls .pm-icon-btn {
         width: 2.375rem;
@@ -121,9 +112,6 @@
     }
 }
 
-/* ------------------------------------------------------------------ *
- * Search panel
- * ------------------------------------------------------------------ */
 .pm-search-panel {
     position: relative;
     display: flex;
@@ -225,9 +213,6 @@
     background: rgba(37, 99, 235, 0.18);
 }
 
-/* ------------------------------------------------------------------ *
- * Search fields & autocomplete dropdown
- * ------------------------------------------------------------------ */
 .pm-field {
     position: relative;
     display: flex;
@@ -403,9 +388,6 @@
     background: rgba(37, 99, 235, 0.12);
 }
 
-/* ------------------------------------------------------------------ *
- * Current-location control
- * ------------------------------------------------------------------ */
 .pm-geolocation {
     position: relative;
     display: flex;
@@ -490,9 +472,6 @@
     background: #1d4ed8;
 }
 
-/* ------------------------------------------------------------------ *
- * Route summary
- * ------------------------------------------------------------------ */
 .pm-route-summary {
     display: flex;
     flex-direction: column;
@@ -536,7 +515,6 @@
     gap: 0.6rem;
 }
 
-/* Single metric — e.g. distance only, when the tier hides the duration. */
 .pm-route-summary__metrics.is-single {
     grid-template-columns: 1fr;
 }
@@ -610,9 +588,6 @@
     color: #94a3b8;
 }
 
-/* ------------------------------------------------------------------ *
- * Map status overlay (missing key / loading / error)
- * ------------------------------------------------------------------ */
 .pm-status-backdrop {
     position: absolute;
     inset: 0;
@@ -671,25 +646,6 @@
     color: #dc2626;
 }
 
-.pm-status-card__hint {
-    font-size: 0.75rem !important;
-    color: #64748b !important;
-    background: rgba(241, 245, 249, 0.9);
-    padding: 0.5rem 0.65rem;
-    border-radius: 0.6rem;
-}
-
-.pm-status-card__link {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #2563eb;
-    text-decoration: none;
-}
-
-.pm-status-card__link:hover {
-    text-decoration: underline;
-}
-
 .pm-status-card__action {
     display: inline-flex;
     align-items: center;
@@ -720,9 +676,6 @@
     border-radius: 999px;
 }
 
-/* ------------------------------------------------------------------ *
- * Map markers
- * ------------------------------------------------------------------ */
 .pm-endpoint-marker {
     width: 2.5rem;
     height: 2.5rem;
@@ -795,9 +748,6 @@
     }
 }
 
-/* ------------------------------------------------------------------ *
- * Skeletons, scrollbars, reduced motion
- * ------------------------------------------------------------------ */
 .pm-skeleton {
     display: block;
     border-radius: 0.4rem;
@@ -901,9 +851,6 @@
     overscroll-behavior: contain;
 }
 
-/* Keep in sync with DeviceSizeEnum.TABLET / isCompact (768px): the control is
-   collapsible exactly when it is bottom-anchored, so the panel always grows
-   upward from a fixed handle and opening/closing never shifts it. */
 @media (max-width: 768px) {
     .pm-overlay {
         grid-template-columns: auto 1fr auto;
@@ -932,25 +879,14 @@
         align-self: end;
     }
 
-    /* Out of grid flow on phones: expanding the panel overlays the map instead
-       of growing the bottom row (which reflowed the summary — the open/close
-       "shift"). Bottom-anchored, so the theme+toggle handle stays fixed and the
-       panel grows upward. */
     .pm-area--controls {
         position: absolute;
         z-index: 6;
         bottom: 0.625rem;
         inset-inline-end: 0.625rem;
     }
-
-    /* Panel stays in-flow: the bottom-anchored cluster grows upward as it
-       opens, so the theme+toggle handle never moves and every button shares
-       the card's glass background - identical to the always-open desktop. */
 }
 
-/* ------------------------------------------------------------------ *
- * Logged-in user badge (replaces the old access-level switcher)
- * ------------------------------------------------------------------ */
 .pm-access {
     display: inline-flex;
     align-items: center;
@@ -994,9 +930,6 @@
     border-radius: 999px;
 }
 
-/* ------------------------------------------------------------------ *
- * Login page
- * ------------------------------------------------------------------ */
 .pm-login {
     position: fixed;
     inset: 0;
@@ -1155,9 +1088,6 @@
     border-radius: 0.45rem;
 }
 
-/* ------------------------------------------------------------------ *
- * VIP: endpoint details, legs & steps
- * ------------------------------------------------------------------ */
 .pm-kv {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -1270,7 +1200,6 @@
     gap: 0.6rem;
 }
 
-/* The rail that visually links step N to step N + 1. */
 .pm-step:not(.is-last)::before {
     content: "";
     position: absolute;
@@ -1368,7 +1297,3 @@
     color: #334155;
     word-break: break-all;
 }
-
-/* .maplibregl-ctrl {
-    display: none;
-} */

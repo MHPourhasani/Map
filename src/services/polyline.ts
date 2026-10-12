@@ -1,6 +1,5 @@
 import type { Position } from "../types/geo";
 
-/** Decodes an "Encoded Polyline Algorithm Format" string (precision 5 — Neshan's format) into `[lng, lat]`. */
 export function decodePolyline(encoded: string, precision = 5): Position[] {
     const factor = 10 ** precision;
     const coordinates: Position[] = [];

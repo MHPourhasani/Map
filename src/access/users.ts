@@ -1,16 +1,12 @@
-import type { AccessLevel } from "./model";
+import { isAccessLevel, type AccessLevel } from "./model";
 
-/**
- * Pre-defined local accounts (demo auth, no backend): each username maps to a
- * fixed password + level, and the level alone drives visibility via capabilities.
- */
 export interface LocalAccount {
     username: string;
-    /** Plain-text demo password (not for production use). */
     password: string;
     level: AccessLevel;
 }
 
+// Demo accounts only: plain-text passwords, not for production
 export const LOCAL_ACCOUNTS: readonly LocalAccount[] = [
     { username: "user-basic", password: "1234", level: "basic" },
     { username: "user-standard", password: "1234", level: "standard" },
@@ -23,7 +19,6 @@ export interface AuthSession {
     level: AccessLevel;
 }
 
-/** Case-sensitive username match + exact password match. Returns session or null. */
 export function authenticate(username: string, password: string): AuthSession | null {
     const normalizedUsername = username.trim();
     if (!normalizedUsername || !password) return null;
@@ -34,10 +29,6 @@ export function authenticate(username: string, password: string): AuthSession | 
 
 export function isAuthSession(value: unknown): value is AuthSession {
     if (typeof value !== "object" || value === null) return false;
-    const candidate = value as Record<string, unknown>;
-    return (
-        typeof candidate.username === "string" &&
-        candidate.username.length > 0 &&
-        (candidate.level === "basic" || candidate.level === "standard" || candidate.level === "vip")
-    );
+    const { username, level } = value as Record<string, unknown>;
+    return typeof username === "string" && username.length > 0 && isAccessLevel(level);
 }

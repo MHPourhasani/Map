@@ -132,8 +132,7 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
                                     : current,
                             );
                         })
-                        .catch(() => {
-                        });
+                        .catch(() => {});
                 }
             })
             .catch((error: unknown) => {

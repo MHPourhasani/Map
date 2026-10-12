@@ -1,9 +1,5 @@
 import type { LngLat, Position } from "../types/geo";
 
-/**
- * Approximates a circle around a point as a GeoJSON polygon ring.
- * Used to draw the geolocation accuracy radius without a turf dependency.
- */
 export function circlePolygon(center: LngLat, radiusMeters: number, segments = 64): Position[] {
     const earthRadius = 6_378_137;
     const latRad = (center.lat * Math.PI) / 180;

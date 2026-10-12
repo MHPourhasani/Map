@@ -2,7 +2,7 @@ import type { StyleSpecification } from "maplibre-gl";
 
 export type MapTheme = "light" | "dark";
 
-/** Paint presets for the OSM raster layer; dark dims + greys the same light tiles. */
+/** Dark mode is the same OSM tiles, dimmed and desaturated via raster paint */
 const PAINT = {
     light: {
         "raster-opacity": 1,
@@ -16,38 +16,19 @@ const PAINT = {
     },
 } as const satisfies Record<MapTheme, Record<string, number>>;
 
-function osmStyle(theme: MapTheme): StyleSpecification {
+export const BASEMAP_HOSTS: readonly string[] = ["tile.openstreetmap.org"];
+
+export function styleFor(theme: MapTheme): StyleSpecification {
     return {
         version: 8,
         sources: {
             osm: {
                 type: "raster",
-                tiles: [
-                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                ],
+                tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
                 tileSize: 256,
                 maxzoom: 19,
-                 },
-        },
-        layers: [
-            {
-                id: "osm-tiles",
-                type: "raster",
-                source: "osm",
-                paint: PAINT[theme],
             },
-        ],
+        },
+        layers: [{ id: "osm-tiles", type: "raster", source: "osm", paint: PAINT[theme] }],
     };
 }
-
-
-/**
- * Style for the active theme — always an inline `StyleSpecification` (never a
- * URL), so MapLibre never fetches a third-party style document.
- */
-export function styleFor(theme: MapTheme): StyleSpecification {
-    return osmStyle(theme);
-}
-
-/** Every external host the basemap is allowed to talk to. */
-export const BASEMAP_HOSTS: readonly string[] = ["tile.openstreetmap.org"];

@@ -1,9 +1,7 @@
 import type { LngLat } from "../types/geo";
 
-/** A successful browser geolocation fix. */
 export interface PositionFix {
     location: LngLat;
-    /** Accuracy radius in meters, as reported by the device. */
     accuracy: number;
     timestamp: number;
 }
@@ -32,10 +30,6 @@ interface GetCurrentPositionOptions {
     maximumAgeMs?: number;
 }
 
-/**
- * Promise wrapper around the browser Geolocation API with typed errors; never
- * resolves before a genuine fix. Browsers only allow this on HTTPS/localhost.
- */
 export function getCurrentPosition(options: GetCurrentPositionOptions = {}): Promise<PositionFix> {
     return new Promise((resolve, reject) => {
         if (typeof navigator === "undefined" || !("geolocation" in navigator)) {

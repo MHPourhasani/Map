@@ -1,14 +1,7 @@
-import { ProviderError } from "../../types/provider";
-import type { SearchProvider } from "../../types/provider";
+import type { SearchProvider } from "../contracts";
+import { ProviderError, type ProviderErrorCode } from "../providerError";
 import { parseCities, rankCities } from "./transform";
 
-/**
- * Key-less place search on the free Iran Locations API
- * (`GET .../api/v1/fa/cities`, CORS `*`, no key). The full list (~344 cities) is
- * fetched once into memory (30 min TTL) — not tied to any query's AbortSignal
- * since it is a shared resource — and keystrokes then filter locally, so typing
- * costs no extra network requests.
- */
 const CITIES_URL = "https://www.iran-locations-api.ir/api/v1/fa/cities";
 const CACHE_TTL_MS = 30 * 60_000;
 
@@ -17,21 +10,14 @@ let cache: { expiresAt: number; promise: Promise<ReturnType<typeof parseCities>>
 async function loadCities() {
     let response: Response;
     try {
-        response = await fetch(CITIES_URL, {
-            method: "GET",
-            headers: { Accept: "application/json" },
-        });
+        response = await fetch(CITIES_URL, { headers: { Accept: "application/json" } });
     } catch (error) {
-        throw new ProviderError("network", "Cities API request failed", {
-            cause: error,
-        });
+        throw new ProviderError("network", "Cities API request failed", { cause: error });
     }
 
     if (!response.ok) {
-        const code = response.status === 429 ? "rate_limited" : response.status === 404 ? "not_found" : "unknown";
-        throw new ProviderError(code, `Cities API error (HTTP ${response.status})`, {
-            status: response.status,
-        });
+        const code: ProviderErrorCode = response.status === 429 ? "rate_limited" : response.status === 404 ? "not_found" : "unknown";
+        throw new ProviderError(code, `Cities API error (HTTP ${response.status})`, { status: response.status });
     }
 
     const payload: unknown = await response.json().catch(() => null);
@@ -42,6 +28,7 @@ async function loadCities() {
     return cities;
 }
 
+/** The city list is a shared resource, so it is cached here rather than tied to one query's abort signal */
 function getCities() {
     if (cache !== null && Date.now() < cache.expiresAt) return cache.promise;
     const promise = loadCities().catch((error: unknown) => {
@@ -54,14 +41,12 @@ function getCities() {
 
 export function createCitiesSearchProvider(): SearchProvider {
     return {
-        async search(request, signal) {
-            const term = request.term.trim();
-            if (term.length === 0) return [];
+        async search({ term, near }, signal) {
+            const trimmedTerm = term.trim();
+            if (trimmedTerm.length === 0) return [];
             const cities = await getCities();
-            if (signal?.aborted) {
-                throw new DOMException("The operation was aborted.", "AbortError");
-            }
-            return rankCities(cities, term, request.near);
+            if (signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+            return rankCities(cities, trimmedTerm, near);
         },
     };
 }

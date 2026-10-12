@@ -14,7 +14,7 @@ export interface RouteSelection {
 /** Single subscription to the route query, shared by every route consumer. */
 export function useRouteSelection(): RouteSelection {
     const { origin, destination, travelMode, selectedRouteIndex } = usePlanner();
-    
+
     const query = useRouteQuery(origin, destination, travelMode);
     const routes = useMemo(() => query.data?.routes ?? [], [query.data]);
     const activeIndex = Math.min(selectedRouteIndex, Math.max(routes.length - 1, 0));

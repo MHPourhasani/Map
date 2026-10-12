@@ -5,7 +5,7 @@ import refresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
-// CJS/ESM interop: the plugin's API may live under `.default`.
+// The plugin's API may live under `.default` depending on module interop
 const reactRefresh = refresh.default ?? refresh;
 
 export default defineConfig([
@@ -23,7 +23,7 @@ export default defineConfig([
             globals: globals.browser,
         },
         rules: {
-            // Context modules intentionally co-locate providers with their hooks.
+            // Context files keep their provider and hook together on purpose
             "react-refresh/only-export-components": "off",
         },
     },

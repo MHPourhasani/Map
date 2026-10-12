@@ -1,26 +1,48 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./queryClient";
-import { I18nProvider } from "./i18n";
 import { AccessProvider, Gate, useAccess } from "./access";
-import { PlannerProvider, usePlanner } from "./state/PlannerContext";
+import { LoginPage } from "./components/auth/LoginPage";
+import { UserBadge } from "./components/auth/UserBadge";
+import { CurrentLocationButton } from "./components/map/CurrentLocationButton";
+import { EndpointMarkers } from "./components/map/EndpointMarkers";
+import { MapControls } from "./components/map/MapControls";
+import { MapStatusOverlay } from "./components/map/MapStatusOverlay";
+import { MapView } from "./components/map/MapView";
+import { RouteLayer } from "./components/map/RouteLayer";
+import { UserLocationLayer } from "./components/map/UserLocationLayer";
+import { RouteSummary } from "./components/route/RouteSummary";
+import { SearchPanel } from "./components/search/SearchPanel";
+import { I18nProvider } from "./i18n";
 import { MapProvider } from "./map/MapContext";
-import { MapView } from "./components/MapView";
-import { EndpointMarkers } from "./components/EndpointMarkers";
-import { RouteLayer } from "./components/RouteLayer";
-import { UserLocationLayer } from "./components/UserLocationLayer";
-import { SearchPanel } from "./components/SearchPanel";
-import { MapControls } from "./components/MapControls";
-import { CurrentLocationButton } from "./components/CurrentLocationButton";
-import { RouteSummary } from "./components/RouteSummary";
-import { StatusOverlay } from "./components/StatusOverlay";
-import { LoginPage } from "./components/LoginPage";
-import { UserBadge } from "./components/UserBadge";
+import { queryClient } from "./queryClient";
+import { GeolocationProvider, useGeolocation } from "./state/GeolocationContext";
+import { ThemeProvider } from "./state/ThemeContext";
+import { TripProvider } from "./state/TripContext";
 
+function AppProviders({ children }: { children: ReactNode }) {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <I18nProvider>
+                <AccessProvider>
+                    <ThemeProvider>
+                        <TripProvider>
+                            <GeolocationProvider>
+                                <MapProvider>{children}</MapProvider>
+                            </GeolocationProvider>
+                        </TripProvider>
+                    </ThemeProvider>
+                </AccessProvider>
+            </I18nProvider>
+        </QueryClientProvider>
+    );
+}
+
+/** Full-screen map with the UI floating above it; every block is shown by capability, never by level */
 function AppShell() {
     const { can, isAuthenticated } = useAccess();
-    const { resetGeolocation } = usePlanner();
+    const { resetGeolocation } = useGeolocation();
 
+    // Losing the location capability (e.g. on logout) also drops the stored position
     const canLocate = can("location.current");
     useEffect(() => {
         if (!canLocate) resetGeolocation();
@@ -65,23 +87,15 @@ function AppShell() {
                 </Gate>
             </div>
 
-            <StatusOverlay />
+            <MapStatusOverlay />
         </div>
     );
 }
 
 export default function App() {
     return (
-        <QueryClientProvider client={queryClient}>
-            <I18nProvider>
-                <AccessProvider>
-                    <PlannerProvider>
-                        <MapProvider>
-                            <AppShell />
-                        </MapProvider>
-                    </PlannerProvider>
-                </AccessProvider>
-            </I18nProvider>
-        </QueryClientProvider>
+        <AppProviders>
+            <AppShell />
+        </AppProviders>
     );
 }

@@ -1,12 +1,5 @@
 import type { LngLat } from "../types/geo";
-import type { SelectedPlace } from "../types/search";
-
-/**
- * Origin/destination persistence in the URL query string (no router):
- * ?origin=<lng>,<lat>&originName=<title>&destination=<lng>,<lat>&destinationName=<title>.
- * Coordinates are rounded to 6 decimals; titles round-trip via replaceState so a
- * refresh/share rebuilds the exact endpoints with no provider call.
- */
+import type { SelectedPlace } from "../types/place";
 
 export interface TripParams {
     origin: SelectedPlace | null;
@@ -35,7 +28,6 @@ function parsePoint(raw: string | null, name: string | null, fallbackId: string)
     return { id: `${fallbackId}:${lng},${lat}`, title, location };
 }
 
-/** Parses `?origin=…&destination=…` from a query string (with or without `?`). */
 export function parseTripParams(search: string): TripParams {
     const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
     return {
@@ -44,7 +36,6 @@ export function parseTripParams(search: string): TripParams {
     };
 }
 
-/** Serializes the trip to a query string (`''` when both endpoints are empty). */
 export function serializeTripParams(origin: SelectedPlace | null, destination: SelectedPlace | null): string {
     const params = new URLSearchParams();
     if (origin) {

@@ -1,18 +1,14 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-/** Tracks a CSS media query; initialized synchronously to avoid a first-paint flash. */
-export function useMediaQuery(query: string) {
-    const [value, setValue] = useState(
-        () => typeof window !== "undefined" && window.matchMedia(query).matches,
+/** Tracks a CSS media query; SSR-safe (returns `false` until hydrated). */
+export function useMediaQuery(query: string): boolean {
+    return useSyncExternalStore(
+        (onChange) => {
+            const list = matchMedia(query);
+            list.addEventListener("change", onChange);
+            return () => list.removeEventListener("change", onChange);
+        },
+        () => matchMedia(query).matches,
+        () => false,
     );
-
-    useEffect(() => {
-        const result = matchMedia(query);
-        const onChange = (event: MediaQueryListEvent) => setValue(event.matches);
-        setValue(result.matches);
-        result.addEventListener("change", onChange);
-        return () => result.removeEventListener("change", onChange);
-    }, [query]);
-
-    return value;
 }

@@ -1,14 +1,8 @@
 import type { LngLat } from "../../types/geo";
-import type { PlaceResult } from "../../types/search";
-
-/**
- * Pure transformation for the Iran Locations API city dataset
- * (free, key-less, CORS-*). Free of runtime imports so it is Node-testable.
- */
+import type { PlaceResult } from "../../types/place";
 
 export const MAX_CITY_RESULTS = 30;
 
-/** Raw record as returned by the API (all fields loosely typed on purpose). */
 export interface RawCity {
     name?: unknown;
     latitude?: unknown;
@@ -22,11 +16,6 @@ function toNumber(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-/**
- * Parses one city record, correcting the ~9% of rows the API ships with
- * `latitude`/`longitude` swapped (inside Iran lat < lng, so `lat > lng` is an
- * unambiguous swap) and dropping records still outside Iran's bounds.
- */
 export function parseCity(raw: RawCity): PlaceResult | null {
     const name = typeof raw.name === "string" ? raw.name.trim() : "";
     if (name.length === 0) return null;
@@ -35,6 +24,7 @@ export function parseCity(raw: RawCity): PlaceResult | null {
     let lng = toNumber(raw.longitude);
     if (lat === null || lng === null) return null;
 
+    // The API ships some rows with latitude/longitude swapped; inside Iran lat < lng
     if (lat > lng) {
         const swapped = lat;
         lat = lng;
@@ -50,7 +40,6 @@ export function parseCity(raw: RawCity): PlaceResult | null {
     };
 }
 
-/** Parses the API payload (an array) and de-duplicates identical rows. */
 export function parseCities(payload: unknown): PlaceResult[] {
     if (!Array.isArray(payload)) return [];
     const seen = new Set<string>();
@@ -66,11 +55,7 @@ export function parseCities(payload: unknown): PlaceResult[] {
     return cities;
 }
 
-/**
- * Normalizes Persian/Arabic text for tolerant matching: Arabic yeh/kaf →
- * Persian, alef variants → ا, ة → ه, strips diacritics/tatweel/ZWNJ, collapses
- * whitespace, lowercases Latin.
- */
+/** Tolerant matching: Arabic/Persian letter variants, diacritics, tatweel and ZWNJ are normalized */
 export function normalizePersian(text: string): string {
     return text
         .toLowerCase()
@@ -108,10 +93,6 @@ function scoreCity(normalizedName: string, normalizedQuery: string): number {
     return 0;
 }
 
-/**
- * Filters/ranks the city list: match quality → distance from the bias point →
- * shorter name. Matching is Persian-normalized, so «تبريز» matches «تبریز».
- */
 export function rankCities(cities: readonly PlaceResult[], term: string, near?: LngLat): PlaceResult[] {
     const query = normalizePersian(term);
     if (query.length === 0) return [];

@@ -1,50 +1,48 @@
-import type { Measure } from "../types/route";
 import { fa } from "../i18n/fa";
+import type { Measure } from "../types/route";
 
 const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
 
-/** Converts ASCII digits (and the decimal separator) to Persian equivalents. */
 export function toFaDigits(value: string | number): string {
     return String(value)
-        .replace(/\d/g, (d) => FA_DIGITS[Number(d)])
+        .replace(/\d/g, (digit) => FA_DIGITS[Number(digit)])
         .replace(/\./g, "٫");
 }
 
-/**
- * Formats a distance in meters: prefers the provider's own localized label,
- * else derives one from the numeric value (pure unit conversion, no estimate).
- */
-export function formatDistance(measure: Measure): string {
-    if (measure.text && measure.text.trim().length > 0) return measure.text;
-    const meters = measure.value;
-    if (!Number.isFinite(meters)) return "—";
-    if (meters >= 1000) {
-        const km = meters / 1000;
-        const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
-        return `${toFaDigits(rounded)} ${fa["unit.km"]}`;
-    }
-    return `${toFaDigits(Math.round(meters))} ${fa["unit.m"]}`;
+function providerLabel({ text }: Measure): string | undefined {
+    return text && text.trim().length > 0 ? text : undefined;
 }
 
-/**
- * Formats a duration in seconds: prefers the provider's label, else derives one
- * from the numeric value (rounding to the nearest minute).
- */
+/** Prefers the provider's own label; otherwise converts meters to a readable Persian string */
+export function formatDistance(measure: Measure): string {
+    const label = providerLabel(measure);
+    if (label) return label;
+
+    const meters = measure.value;
+    if (!Number.isFinite(meters)) return "—";
+    if (meters < 1000) return `${toFaDigits(Math.round(meters))} ${fa["unit.m"]}`;
+
+    const km = meters / 1000;
+    const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
+    return `${toFaDigits(rounded)} ${fa["unit.km"]}`;
+}
+
+/** Prefers the provider's own label; otherwise converts seconds to hours and minutes */
 export function formatDuration(measure: Measure): string {
-    if (measure.text && measure.text.trim().length > 0) return measure.text;
+    const label = providerLabel(measure);
+    if (label) return label;
+
     const seconds = measure.value;
     if (!Number.isFinite(seconds)) return "—";
     if (seconds < 60) return fa["unit.lessThanMinute"];
+
     const totalMinutes = Math.round(seconds / 60);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    if (hours === 0) return `${toFaDigits(minutes)} ${fa["unit.minute"]}`;
-    if (minutes === 0) return `${toFaDigits(hours)} ${fa["unit.hour"]}`;
-    return `${toFaDigits(hours)} ${fa["unit.hour"]} و ${toFaDigits(minutes)} ${fa["unit.minute"]}`;
-}
+    const hoursText = `${toFaDigits(hours)} ${fa["unit.hour"]}`;
+    const minutesText = `${toFaDigits(minutes)} ${fa["unit.minute"]}`;
 
-/** True when the user prefers reduced motion (used to disable animations). */
-export function prefersReducedMotion(): boolean {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (hours === 0) return minutesText;
+    if (minutes === 0) return hoursText;
+    return `${hoursText} و ${minutesText}`;
 }

@@ -1,9 +1,3 @@
-/**
- * Raw (untrusted) Neshan response shapes. Endpoints: search `v3/search`,
- * direction `v4/direction`, reverse `v5/reverse`. Every field is optional (the
- * API may evolve); the mappers validate all of it before it reaches the UI.
- */
-
 export interface NeshanMeasure {
     value?: number;
     text?: string;
@@ -35,7 +29,6 @@ export interface NeshanStep {
     exit?: number;
     distance?: NeshanMeasure;
     duration?: NeshanMeasure;
-    /** Encoded polyline of the step geometry (precision 5). */
     polyline?: string;
     /** [longitude, latitude] */
     start_location?: [number, number];

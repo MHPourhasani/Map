@@ -53,7 +53,10 @@ Evaluated options and official documentation (links in §5):
 
 - CORS: `OPTIONS https://api.neshan.org/v3/search` from `http://localhost:5173` returns
   `access-control-allow-origin: <reflected origin>` and `access-control-allow-headers: … api-key …`
-  → browser-side calls with an `Api-Key` header are supported without a proxy.
+  → browser-side calls with an `Api-Key` header are supported without a proxy. Because of that custom
+  header the browser sends this `OPTIONS` preflight before every call, so DevTools lists each
+  `/v4/direction` request twice (OPTIONS + GET) although the app sends only one. To remove the
+  preflight, set `VITE_NESHAN_API_BASE` to a same-origin proxy (`/neshan` works in dev).
 - Error semantics: invalid key → HTTP `480 KeyNotFound` (also documented `481 LimitExceeded`,
   `482 RateExceeded`, `483/485 ApiKey…`, mapped to typed app errors).
 - **The basemap is 100 % OpenStreetMap and needs no key at all.** Both themes are an inline
@@ -102,67 +105,59 @@ the map itself always renders.
 
 ```
 src/
-├── App.tsx                    # providers + full-screen shell (grid overlay)
-├── main.tsx                   # entry (SDK css + index.css)
+├── main.tsx / App.tsx         # entry; AppProviders (context order) + full-screen AppShell
 ├── index.css                  # Tailwind v4 + glassmorphism + RTL overlay grid
 ├── queryClient.ts             # TanStack Query defaults (retry policy per error type)
-├── config/env.ts              # VITE_* access (map key / API key / style overrides)
-├── i18n/                      # flat Persian catalog + typed t() (English fallback ready)
-│   ├── fa.ts                  #   all UI strings (MessageKey)
-│   └── index.tsx              #   I18nProvider / useT
-├── access/                    # login auth: users.ts (3 demo accounts), AccessContext, Gate
+├── config/env.ts              # VITE_* access (API key, API base URL, search backend)
+├── i18n/                      # Persian catalog (fa.ts) + typed t() (I18nProvider / useT)
+├── access/                    # who may see what
 │   ├── users.ts               #   LOCAL_ACCOUNTS + authenticate()
 │   ├── source.ts              #   localStorage session persistence (swap for JWT later)
-│   ├── model.ts               #   level → capability matrix (who can see what)
-│   ├── AccessContext.tsx      #   login()/logout()/can()
+│   ├── model.ts               #   level -> capability matrix
+│   ├── AccessContext.tsx      #   login() / logout() / can()
 │   └── Gate.tsx               #   capability-gated rendering
-├── types/                     # provider-agnostic domain models
-│   ├── geo.ts  search.ts  route.ts  provider.ts
+├── state/                     # one small context per concern (components re-render only for what they use)
+│   ├── TripContext.tsx        #   origin, destination, selected route (reducer) + URL sync
+│   ├── GeolocationContext.tsx #   device position request/status
+│   └── ThemeContext.tsx       #   light/dark basemap, persisted
+├── map/                       # MapLibre helpers (no React components)
+│   ├── MapContext.tsx         #   map instance, ready flag, styleVersion, errors, reload
+│   ├── styles.ts              #   key-less OpenStreetMap styles (light/dark paint)
+│   ├── styleReady.ts          #   wait until the style accepts changes
+│   ├── routeLayers.ts         #   idempotent route sources/layers + draw animation
+│   └── camera.ts              #   fit-to-bounds helper
+├── types/                     # provider-agnostic domain models: geo.ts  place.ts  route.ts
 ├── providers/                 # pluggable service layer (swap vendors in one file)
-│   ├── registry.ts            # picks backends from env + exposes availability flags
-│   ├── iranLocations/         # default search: free cities API (unit-tested transform)
-│   └── neshan/                # Neshan adapters: routing, reverse, optional street search
-├── services/
-│   ├── polyline.ts            # Encoded-Polyline decoder (unit-tested)
-│   └── geolocation.ts         # browser Geolocation -> typed fixes/errors
-├── hooks/
-│   ├── useSearchQuery.ts      # debounced/cancellable/cached autocomplete
-│   ├── useRouteQuery.ts       # route calculation keyed by coordinates
-│   ├── useDebouncedValue.ts  useClickOutside.ts
-├── map/
-│   ├── MapContext.tsx         # map store (instance, ready, styleVersion, errors, reload)
-│   ├── styles.ts              # key-less OpenStreetMap basemap styles (light/dark paint)
-│   ├── routeLayers.ts         # idempotent GeoJSON route sources/layers
-│   └── waitForStyleLoaded.ts  # style-swap synchronization
-├── state/PlannerContext.tsx   # origin, destination, route index, theme, geolocation
-├── utils/                     # cn, formatting (Persian digits), errors, geo math
+│   ├── contracts.ts           #   SearchProvider / RoutingProvider / ReverseGeocodingProvider
+│   ├── providerError.ts       #   ProviderError + error codes
+│   ├── registry.ts            #   picks backends from env
+│   ├── iranLocations/         #   default search: free cities API
+│   └── neshan/                #   routing, reverse geocoding, optional street search
+├── services/                  # polyline.ts (decoder), geolocation.ts (browser API wrapper)
+├── hooks/                     # useActiveRoute, useSearchQuery, useAddressLabel,
+│                              # useCurrentLocationAsOrigin, useMapOrientation, useMediaQuery, ...
+├── utils/                     # cn, format (Persian digits), errors, geo math, motion, tripUrl
 └── components/
-    ├── MapView.tsx                # map lifecycle + theme switching + error reporting
-    ├── SearchPanel.tsx            # floating glass panel (upper-right)
-    ├── LocationSearchInput.tsx    # ARIA combobox (debounce, keyboard, clear)
-    ├── SearchResultsDropdown.tsx  # listbox popup (loading/empty/error states)
-    ├── MapControls.tsx            # zoom / reset / fit / compass / theme (upper-left)
-    ├── CurrentLocationButton.tsx  # geolocation + accuracy + "use as origin" (bottom-right)
-    ├── RouteLayer.tsx             # draws route, fits bounds, alternative clicks
-    ├── RouteSummary.tsx           # distance/time/alternatives card (bottom-left)
-    ├── EndpointMarkers.tsx        # origin/destination badges
-    ├── UserLocationLayer.tsx      # pulsing marker + accuracy circle
-    ├── StatusOverlay.tsx          # missing-key / loading / map-error states
-    ├── LoginPage.tsx              # login gate (3 pre-defined accounts)
-    ├── UserBadge.tsx              # username + tier + logout (top-center)
-    └── ui/IconButton.tsx
+    ├── map/                   # MapView, MapControls, MapStatusOverlay, RouteLayer,
+    │                          # EndpointMarkers, UserLocationLayer, CurrentLocationButton
+    ├── search/                # SearchPanel, LocationSearchInput, SearchResultsDropdown
+    ├── route/                 # RouteSummary, RouteLegs, EndpointDetails
+    ├── auth/                  # LoginPage, UserBadge
+    └── ui/                    # IconButton, DetailRow
 ```
+
+Layers depend downward only: `components` -> `hooks` / `state` / `map` -> `providers` / `services` -> `types` / `utils`.
 
 Key design decisions:
 
 - **Provider abstraction** — `SearchProvider` / `RoutingProvider` / `ReverseGeocodingProvider`
-  interfaces in `types/provider.ts`; the UI only sees `MapServices` from `providers/registry.ts`.
+  interfaces in `providers/contracts.ts`; the UI only sees `MapServices` from `providers/registry.ts`.
   Replacing Neshan (or proxying through a backend) is a registry change only.
 - **Server state** — React Query owns search & route queries: keys `['place-search', term]` and
   `['route', [lng,lat], [lng,lat], mode]`; React Query passes an `AbortSignal` so obsolete requests
-  are cancelled; stale routes disappear automatically because the query is disabled until both
-  endpoints exist.
-- **Map state** — the MapLibre instance lives in `MapContext`; `styleVersion` bumps after each
+  are cancelled; the route query is skipped until both endpoints exist. Every component reads the
+  route through `useActiveRoute()`, and identical keys share a single `/v4/direction` request.
+- **Map state** — the MapLibre instance lives in `MapContext` (a reducer); `styleVersion` bumps after each
   basemap swap so route/accuracy layers are re-created idempotently.
 - **Local state** — dropdown open/highlight, popover visibility and transient UI stay local.
 - **Access control** — the login page validates against 3 hard-coded accounts in

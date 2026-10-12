@@ -1,24 +1,13 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useEffectEvent, type RefObject } from "react";
 
-/**
- * Invokes `handler` when a pointer event happens outside `ref`.
- * Listens on the capture phase so inner handlers still run first.
- */
-export function useClickOutside<T extends HTMLElement>(ref: RefObject<T | null>, handler: () => void, active: boolean): void {
-    const handlerRef = useRef(handler);
-
-    useEffect(() => {
-        handlerRef.current = handler;
-    }, [handler]);
+/** Calls `onOutsideClick` when a pointer goes down outside `ref`; only listens while `active` */
+export function useClickOutside(ref: RefObject<HTMLElement | null>, onOutsideClick: () => void, active: boolean): void {
+    const handleOutsideClick = useEffectEvent(onOutsideClick);
 
     useEffect(() => {
         if (!active) return;
         const onPointerDown = (event: Event) => {
-            const element = ref.current;
-            if (!element) return;
-            if (event.target instanceof Node && !element.contains(event.target)) {
-                handlerRef.current();
-            }
+            if (event.target instanceof Node && ref.current && !ref.current.contains(event.target)) handleOutsideClick();
         };
         document.addEventListener("pointerdown", onPointerDown, true);
         return () => document.removeEventListener("pointerdown", onPointerDown, true);

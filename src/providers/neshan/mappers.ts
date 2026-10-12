@@ -1,5 +1,5 @@
-import type { LngLat, Position } from "../../types/geo";
-import type { PlaceResult, ReverseResult } from "../../types/search";
+import type { Position } from "../../types/geo";
+import type { PlaceResult, ReverseResult } from "../../types/place";
 import type { Measure, Route, RouteLeg, RouteResult, RouteStep } from "../../types/route";
 import { decodePolyline } from "../../services/polyline";
 import type {
@@ -16,166 +16,135 @@ function isFiniteNumber(value: unknown): value is number {
     return typeof value === "number" && Number.isFinite(value);
 }
 
-function toMeasure(measure: NeshanMeasure | undefined): Measure {
-    const value = isFiniteNumber(measure?.value) ? measure.value : 0;
-    const text = typeof measure?.text === "string" && measure.text.trim().length > 0 ? measure.text : undefined;
-    return text !== undefined ? { value, text } : { value };
+function isNonEmpty(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
 }
 
-function joinParts(parts: Array<string | undefined | null>): string | undefined {
-    const filtered = parts.filter((part): part is string => typeof part === "string" && part.trim().length > 0);
+function joinParts(parts: unknown[]): string | undefined {
+    const filtered = parts.filter(isNonEmpty);
     return filtered.length > 0 ? filtered.join("، ") : undefined;
 }
 
-/** Maps one Neshan search item to the provider-agnostic `PlaceResult`. */
+function toMeasure(measure: NeshanMeasure | undefined): Measure {
+    const value = isFiniteNumber(measure?.value) ? measure.value : 0;
+    return isNonEmpty(measure?.text) ? { value, text: measure.text } : { value };
+}
+
+function safeDecode(encoded: string | undefined): Position[] {
+    if (!isNonEmpty(encoded)) return [];
+    try {
+        return decodePolyline(encoded);
+    } catch {
+        return [];
+    }
+}
+
 export function mapSearchItem(item: NeshanSearchItem, index: number): PlaceResult | null {
     const title = typeof item.title === "string" ? item.title.trim() : "";
     const lng = item.location?.x;
     const lat = item.location?.y;
-    if (title.length === 0 || !isFiniteNumber(lng) || !isFiniteNumber(lat)) {
-        return null;
-    }
+    if (title.length === 0 || !isFiniteNumber(lng) || !isFiniteNumber(lat)) return null;
 
-    const id = typeof item.poiHash === "string" && item.poiHash.length > 0 ? item.poiHash : `${title}|${lng}|${lat}|${index}`;
+    const id = isNonEmpty(item.poiHash) ? item.poiHash : `${title}|${lng}|${lat}|${index}`;
+    const place: PlaceResult = { id, title, location: { lng, lat } };
 
-    const result: PlaceResult = { id, title, location: { lng, lat } };
-    if (typeof item.address === "string" && item.address.trim().length > 0) {
-        result.address = item.address.trim();
-    }
+    if (isNonEmpty(item.address)) place.address = item.address.trim();
     const locality = joinParts([item.region, item.neighbourhood]);
-    if (locality !== undefined) result.locality = locality;
-    if (typeof item.category === "string" && item.category.length > 0) {
-        result.category = item.category;
-    }
-    return result;
-}
-
-function nonEmpty(value: unknown): value is string {
-    return typeof value === "string" && value.trim().length > 0;
+    if (locality !== undefined) place.locality = locality;
+    if (isNonEmpty(item.category)) place.category = item.category;
+    return place;
 }
 
 function mapStep(step: NeshanStep): RouteStep {
     const result: RouteStep = {
         distance: toMeasure(step.distance),
         duration: toMeasure(step.duration),
-        pointCount: stepGeometry(step).length,
+        pointCount: safeDecode(step.polyline).length,
     };
-    if (nonEmpty(step.instruction)) result.instruction = step.instruction;
-    if (nonEmpty(step.name)) result.name = step.name;
-    if (nonEmpty(step.type)) result.type = step.type;
-    if (nonEmpty(step.modifier)) result.modifier = step.modifier;
-    if (nonEmpty(step.rotaryName)) result.rotaryName = step.rotaryName;
+    if (isNonEmpty(step.instruction)) result.instruction = step.instruction;
+    if (isNonEmpty(step.name)) result.name = step.name;
+    if (isNonEmpty(step.type)) result.type = step.type;
+    if (isNonEmpty(step.modifier)) result.modifier = step.modifier;
+    if (isNonEmpty(step.rotaryName)) result.rotaryName = step.rotaryName;
     if (isFiniteNumber(step.bearing_after)) result.bearingAfter = step.bearing_after;
     if (isFiniteNumber(step.exit)) result.exit = step.exit;
-    if (nonEmpty(step.polyline)) result.polyline = step.polyline;
+    if (isNonEmpty(step.polyline)) result.polyline = step.polyline;
+
     const start = step.start_location;
     if (Array.isArray(start) && isFiniteNumber(start[0]) && isFiniteNumber(start[1])) {
-        const location: LngLat = { lng: start[0], lat: start[1] };
-        result.start = location;
+        result.start = { lng: start[0], lat: start[1] };
     }
     return result;
 }
 
 function mapLeg(leg: NeshanLeg): RouteLeg {
-    const distance = toMeasure(leg.distance);
-    const duration = toMeasure(leg.duration);
     const result: RouteLeg = {
-        distance,
-        duration,
+        distance: toMeasure(leg.distance),
+        duration: toMeasure(leg.duration),
         steps: (leg.steps ?? []).map(mapStep),
     };
     if (typeof leg.summary === "string") result.summary = leg.summary;
     return result;
 }
 
-function stepGeometry(step: NeshanStep): Position[] {
-    if (typeof step.polyline !== "string" || step.polyline.length === 0) return [];
-    try {
-        return decodePolyline(step.polyline);
-    } catch {
-        return [];
-    }
-}
-
 function decodeOverview(points: string | undefined): Position[] {
-    if (typeof points !== "string" || points.length === 0) return [];
-    try {
-        const geometry = decodePolyline(points);
-        return geometry.length > 1 ? geometry : [];
-    } catch {
-        return [];
-    }
+    const geometry = safeDecode(points);
+    return geometry.length > 1 ? geometry : [];
 }
 
-/** Concatenates per-step geometries when `overview_polyline` is missing. */
+/** Fallback geometry: the step polylines joined end to end */
 function geometryFromSteps(raw: NeshanRoute): Position[] {
     const geometry: Position[] = [];
     for (const step of (raw.legs ?? []).flatMap((leg) => leg.steps ?? [])) {
-        const part = stepGeometry(step);
+        const part = safeDecode(step.polyline);
         if (part.length === 0) continue;
         const last = geometry[geometry.length - 1];
-        if (last && last[0] === part[0][0] && last[1] === part[0][1]) {
-            geometry.push(...part.slice(1));
-        } else {
-            geometry.push(...part);
-        }
+        const continuesLast = last !== undefined && last[0] === part[0][0] && last[1] === part[0][1];
+        geometry.push(...(continuesLast ? part.slice(1) : part));
     }
     return geometry;
 }
 
-function sumMeasure(legs: RouteLeg[], which: "distance" | "duration"): number {
-    return legs.reduce((total, leg) => total + (leg[which].value || 0), 0);
+function sumMeasure(legs: RouteLeg[], which: "distance" | "duration"): Measure {
+    return { value: legs.reduce((total, leg) => total + (leg[which].value || 0), 0) };
+}
+
+/** Uses the provider's route-level value, else the single leg's, else the sum of the legs */
+function routeMeasure(raw: NeshanMeasure | undefined, legs: RouteLeg[], which: "distance" | "duration"): Measure {
+    if (isFiniteNumber(raw?.value)) return toMeasure(raw);
+    return legs.length === 1 ? legs[0][which] : sumMeasure(legs, which);
 }
 
 function mapRoute(raw: NeshanRoute, index: number): Route | null {
     const legs = (raw.legs ?? []).map(mapLeg);
-    const geometry = decodeOverview(raw.overview_polyline?.points);
-    const finalGeometry = geometry.length >= 2 ? geometry : geometryFromSteps(raw);
-    if (finalGeometry.length < 2) return null;
-
-    const distance: Measure = isFiniteNumber(raw.distance?.value)
-        ? toMeasure(raw.distance)
-        : legs.length === 1
-          ? legs[0].distance
-          : { value: sumMeasure(legs, "distance") };
-    const duration: Measure = isFiniteNumber(raw.duration?.value)
-        ? toMeasure(raw.duration)
-        : legs.length === 1
-          ? legs[0].duration
-          : { value: sumMeasure(legs, "duration") };
+    const overview = decodeOverview(raw.overview_polyline?.points);
+    const geometry = overview.length >= 2 ? overview : geometryFromSteps(raw);
+    if (geometry.length < 2) return null;
 
     const route: Route = {
         id: `route-${index}`,
-        geometry: finalGeometry,
-        distance,
-        duration,
+        geometry,
+        distance: routeMeasure(raw.distance, legs, "distance"),
+        duration: routeMeasure(raw.duration, legs, "duration"),
         legs,
     };
-    if (nonEmpty(raw.overview_polyline?.points)) {
-        route.overviewPolyline = raw.overview_polyline.points;
-    }
-    if (nonEmpty(raw.summary)) route.summary = raw.summary;
+    if (isNonEmpty(raw.overview_polyline?.points)) route.overviewPolyline = raw.overview_polyline.points;
+    if (isNonEmpty(raw.summary)) route.summary = raw.summary;
     return route;
 }
 
-/** Normalizes a Neshan directions response into `RouteResult`. */
 export function mapDirectionResponse(data: NeshanDirectionResponse): RouteResult {
-    const routes = (data.routes ?? []).map(mapRoute).filter((route): route is Route => route !== null);
-    return { routes };
+    return { routes: (data.routes ?? []).map(mapRoute).filter((route) => route !== null) };
 }
 
-/** Normalizes a Neshan reverse-geocoding response. */
 export function mapReverseResponse(data: NeshanReverseResponse): ReverseResult {
-    const fallback = joinParts([data.route_name, data.neighbourhood, data.city]);
-    const formattedAddress =
-        typeof data.formatted_address === "string" && data.formatted_address.trim().length > 0
-            ? data.formatted_address.trim()
-            : (fallback ?? "");
+    const formattedAddress = isNonEmpty(data.formatted_address)
+        ? data.formatted_address.trim()
+        : (joinParts([data.route_name, data.neighbourhood, data.city]) ?? "");
+
     const result: ReverseResult = { formattedAddress };
-    if (typeof data.city === "string" && data.city.length > 0) result.city = data.city;
-    if (typeof data.state === "string" && data.state.length > 0) result.state = data.state;
-    if (typeof data.neighbourhood === "string" && data.neighbourhood.length > 0) {
-        result.neighbourhood = data.neighbourhood;
-    }
+    if (isNonEmpty(data.city)) result.city = data.city;
+    if (isNonEmpty(data.state)) result.state = data.state;
+    if (isNonEmpty(data.neighbourhood)) result.neighbourhood = data.neighbourhood;
     return result;
 }

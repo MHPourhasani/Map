@@ -4,19 +4,16 @@ import { localSessionSource, type AuthSource } from "./source";
 import { authenticate, type AuthSession } from "./users";
 
 export interface AccessValue {
-    /** Effective level: the logged-in tier, or the public default when logged out. */
+    /** The signed-in tier, or the default level when signed out */
     level: AccessLevel;
-    /** Active session, or null when logged out. */
     session: AuthSession | null;
-    /** True when a user is logged in. */
     isAuthenticated: boolean;
-    /** Validate credentials against the pre-defined accounts. */
     login: (username: string, password: string) => boolean;
-    /** Clear the session. */
     logout: () => void;
-    /** Capability check — the only thing feature code should depend on. */
+    /** Feature code should check capabilities, never levels */
     can: (capability: Capability) => boolean;
 }
+
 const AccessContext = createContext<AccessValue | null>(null);
 
 export function AccessProvider({ children, source = localSessionSource }: { children: ReactNode; source?: AuthSource }) {

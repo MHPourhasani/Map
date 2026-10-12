@@ -23,9 +23,12 @@ export function EndpointMarkers() {
         if (!map) return;
         const markers: MarkerInstance[] = [];
         const add = (place: SelectedPlace, kind: "origin" | "destination") => {
-            const ariaLabel = kind === "origin" ? `${t("search.origin.label")}: ${place.title}` : `${t("search.destination.label")}: ${place.title}`;
+            const ariaLabel =
+                kind === "origin" ? `${t("search.origin.label")}: ${place.title}` : `${t("search.destination.label")}: ${place.title}`;
             const element = createEndpointElement(`pm-endpoint-marker--${kind}`, ariaLabel);
-            markers.push(new maplibregl.Marker({ element, anchor: "bottom" }).setLngLat([place.location.lng, place.location.lat]).addTo(map));
+            markers.push(
+                new maplibregl.Marker({ element, anchor: "bottom" }).setLngLat([place.location.lng, place.location.lat]).addTo(map),
+            );
         };
         if (origin) add(origin, "origin");
         if (destination) add(destination, "destination");
@@ -36,4 +39,3 @@ export function EndpointMarkers() {
 
     return null;
 }
-

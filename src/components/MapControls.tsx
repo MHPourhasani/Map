@@ -89,7 +89,7 @@ export function MapControls() {
 
     return (
         <section
-            className="glass relative flex w-fit min-w-10 flex-col gap-1 rounded-2xl p-1 justify-self-end"
+            className="glass relative flex w-fit min-w-10 flex-col gap-1 justify-self-end rounded-2xl p-1"
             role="group"
             aria-label={t("controls.group")}
         >
