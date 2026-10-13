@@ -17,8 +17,4 @@ export enum Capability {
     ROUTE_LEGS = "route.legs",
 }
 
-export const ACCESS_LEVEL_ORDER: readonly AccessLevel[] = [
-    AccessLevel.BASIC,
-    AccessLevel.STANDARD,
-    AccessLevel.VIP,
-];
+export const ACCESS_LEVEL_ORDER: readonly AccessLevel[] = [AccessLevel.BASIC, AccessLevel.STANDARD, AccessLevel.VIP];

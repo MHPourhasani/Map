@@ -5,17 +5,8 @@ export const DEFAULT_ACCESS_LEVEL = AccessLevel.BASIC;
 
 /** Each tier adds capabilities; users inherit capabilities from lower tiers. */
 export const CAPABILITY_MATRIX: Record<AccessLevel, readonly Capability[]> = {
-    [AccessLevel.BASIC]: [
-        Capability.MAP_VIEW,
-        Capability.PLACES_SELECT,
-        Capability.ROUTE_SUMMARY,
-        Capability.ROUTE_ENDPOINT_DETAILS,
-    ],
-    [AccessLevel.STANDARD]: [
-        Capability.MAP_CONTROLS,
-        Capability.CURRENT_LOCATION,
-        Capability.ROUTE_DURATION,
-    ],
+    [AccessLevel.BASIC]: [Capability.MAP_VIEW, Capability.PLACES_SELECT, Capability.ROUTE_SUMMARY, Capability.ROUTE_ENDPOINT_DETAILS],
+    [AccessLevel.STANDARD]: [Capability.MAP_CONTROLS, Capability.CURRENT_LOCATION, Capability.ROUTE_DURATION],
     [AccessLevel.VIP]: [Capability.ROUTE_LEGS],
 };
 

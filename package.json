@@ -9,8 +9,8 @@
         "typecheck": "tsc -b",
         "lint": "eslint .",
         "preview": "vite preview",
-        "format": "prettier . --write",
-        "format:check": "prettier . --check"
+        "prettier": "prettier . --write",
+        "prettier:check": "prettier . --check"
     },
     "dependencies": {
         "@tanstack/react-query": "^5.104.1",
