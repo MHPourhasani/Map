@@ -1,22 +1,23 @@
-import { isAccessLevel, type AccessLevel } from "./model";
+import { isAccessLevel } from "./model";
+import { AccessLevel, type AccessLevel as AccessLevelType } from "./enums";
 
 export interface LocalAccount {
     username: string;
     password: string;
-    level: AccessLevel;
+    level: AccessLevelType;
 }
 
 // Demo accounts only: plain-text passwords, not for production
 export const LOCAL_ACCOUNTS: readonly LocalAccount[] = [
-    { username: "user-basic", password: "1234", level: "basic" },
-    { username: "user-standard", password: "1234", level: "standard" },
-    { username: "user-vip", password: "1234", level: "vip" },
-    { username: "user-vip2p", password: "1234", level: "vip" },
+    { username: "user-basic", password: "1234", level: AccessLevel.BASIC },
+    { username: "user-standard", password: "1234", level: AccessLevel.STANDARD },
+    { username: "user-vip", password: "1234", level: AccessLevel.VIP },
+    { username: "user-vip2p", password: "1234", level: AccessLevel.VIP },
 ] as const;
 
 export interface AuthSession {
     username: string;
-    level: AccessLevel;
+    level: AccessLevelType;
 }
 
 export function authenticate(username: string, password: string): AuthSession | null {

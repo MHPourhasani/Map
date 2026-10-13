@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { AccessProvider, Gate, useAccess } from "./access";
+import { AccessProvider, Gate, useAccess, Capability } from "./access";
 import { LoginPage } from "./components/auth/LoginPage";
 import { UserBadge } from "./components/auth/UserBadge";
 import { CurrentLocationButton } from "./components/map/CurrentLocationButton";
@@ -37,13 +37,12 @@ function AppProviders({ children }: { children: ReactNode }) {
     );
 }
 
-/** Full-screen map with the UI floating above it; every block is shown by capability, never by level */
 function AppShell() {
     const { can, isAuthenticated } = useAccess();
     const { resetGeolocation } = useGeolocation();
 
     // Losing the location capability (e.g. on logout) also drops the stored position
-    const canLocate = can("location.current");
+    const canLocate = can(Capability.CURRENT_LOCATION);
     useEffect(() => {
         if (!canLocate) resetGeolocation();
     }, [canLocate, resetGeolocation]);
@@ -52,17 +51,17 @@ function AppShell() {
 
     return (
         <div className="pm-shell">
-            <Gate capability="map.view">
+            <Gate capability={Capability.MAP_VIEW}>
                 <MapView />
                 <EndpointMarkers />
                 <RouteLayer />
             </Gate>
-            <Gate capability="location.current">
+            <Gate capability={Capability.CURRENT_LOCATION}>
                 <UserLocationLayer />
             </Gate>
 
             <div className="pm-overlay">
-                <Gate capability="places.select">
+                <Gate capability={Capability.PLACES_SELECT}>
                     <div className="pm-area pm-area--search">
                         <SearchPanel />
                     </div>
@@ -70,17 +69,17 @@ function AppShell() {
                 <div className="pm-area pm-area--access">
                     <UserBadge />
                 </div>
-                <Gate capability="map.controls">
+                <Gate capability={Capability.MAP_CONTROLS}>
                     <div className="pm-area pm-area--controls">
                         <MapControls />
                     </div>
                 </Gate>
-                <Gate capability="location.current">
+                <Gate capability={Capability.CURRENT_LOCATION}>
                     <div className="pm-area pm-area--location">
                         <CurrentLocationButton />
                     </div>
                 </Gate>
-                <Gate capability="route.summary">
+                <Gate capability={Capability.ROUTE_SUMMARY}>
                     <div className="pm-area pm-area--summary rounded-2xl">
                         <RouteSummary />
                     </div>

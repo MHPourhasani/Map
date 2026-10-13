@@ -1,32 +1,31 @@
-export const ACCESS_LEVELS = ["basic", "standard", "vip"] as const;
-export type AccessLevel = (typeof ACCESS_LEVELS)[number];
+import { ACCESS_LEVEL_ORDER, AccessLevel, Capability } from "./enums";
 
-export const DEFAULT_ACCESS_LEVEL: AccessLevel = "basic";
+export { AccessLevel, Capability } from "./enums";
+export const DEFAULT_ACCESS_LEVEL = AccessLevel.BASIC;
 
-export type Capability =
-    | "map.view"
-    | "places.select"
-    | "route.summary"
-    | "route.endpointDetails"
-    | "map.controls"
-    | "location.current"
-    | "route.duration"
-    | "route.legs";
-
-/** Capabilities each level adds; higher levels inherit every lower level */
+/** Each tier adds capabilities; users inherit capabilities from lower tiers. */
 export const CAPABILITY_MATRIX: Record<AccessLevel, readonly Capability[]> = {
-    basic: ["map.view", "places.select", "route.summary", "route.endpointDetails"],
-    standard: ["map.controls", "location.current", "route.duration"],
-    vip: ["route.legs"],
+    [AccessLevel.BASIC]: [
+        Capability.MAP_VIEW,
+        Capability.PLACES_SELECT,
+        Capability.ROUTE_SUMMARY,
+        Capability.ROUTE_ENDPOINT_DETAILS,
+    ],
+    [AccessLevel.STANDARD]: [
+        Capability.MAP_CONTROLS,
+        Capability.CURRENT_LOCATION,
+        Capability.ROUTE_DURATION,
+    ],
+    [AccessLevel.VIP]: [Capability.ROUTE_LEGS],
 };
 
 export function isAccessLevel(value: unknown): value is AccessLevel {
-    return typeof value === "string" && (ACCESS_LEVELS as readonly string[]).includes(value);
+    return typeof value === "string" && ACCESS_LEVEL_ORDER.includes(value as AccessLevel);
 }
 
 export function capabilitiesOf(level: AccessLevel): ReadonlySet<Capability> {
-    const rank = ACCESS_LEVELS.indexOf(level);
-    return new Set(ACCESS_LEVELS.slice(0, rank + 1).flatMap((l) => CAPABILITY_MATRIX[l]));
+    const rank = ACCESS_LEVEL_ORDER.indexOf(level);
+    return new Set(ACCESS_LEVEL_ORDER.slice(0, rank + 1).flatMap((tier) => CAPABILITY_MATRIX[tier]));
 }
 
 export function hasCapability(level: AccessLevel, capability: Capability): boolean {

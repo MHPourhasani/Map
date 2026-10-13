@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Capability } from "./model";
+import { Capability } from "./enums";
 import { useAccess } from "./AccessContext";
 
 /** Renders `children` only when the current level has `capability` */
