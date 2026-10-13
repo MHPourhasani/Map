@@ -676,6 +676,7 @@
     border-radius: 999px;
 }
 
+
 .pm-endpoint-marker {
     width: 2.5rem;
     height: 2.5rem;
@@ -683,15 +684,10 @@
     place-items: center;
     color: #fff;
     border: 2px solid #fff;
-    border-radius: 50% 50% 50% 0;
+    border-radius: 50%;
     box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.5);
     user-select: none;
     animation: pm-drop 0.3s ease-out;
-    transform: rotate(-45deg);
-}
-
-.pm-endpoint-marker svg {
-    transform: rotate(45deg);
 }
 
 .pm-endpoint-marker--origin {
