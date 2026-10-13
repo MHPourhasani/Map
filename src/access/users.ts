@@ -1,5 +1,5 @@
-import { isAccessLevel } from "./model";
-import { AccessLevel, type AccessLevel as AccessLevelType } from "./enums";
+import { isAccessLevel } from "./model.ts";
+import { AccessLevel, type AccessLevel as AccessLevelType } from "./enums.ts";
 
 export interface LocalAccount {
     username: string;

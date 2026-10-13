@@ -1,6 +1,6 @@
-import { ACCESS_LEVEL_ORDER, AccessLevel, Capability } from "./enums";
+import { ACCESS_LEVEL_ORDER, AccessLevel, Capability } from "./enums.ts";
 
-export { AccessLevel, Capability } from "./enums";
+export { AccessLevel, Capability, ACCESS_LEVEL_ORDER } from "./enums.ts";
 export const DEFAULT_ACCESS_LEVEL = AccessLevel.BASIC;
 
 /** Each tier adds capabilities; users inherit capabilities from lower tiers. */

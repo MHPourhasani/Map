@@ -1,5 +1,5 @@
 import { ArrowUpDown, CircleDot, Crosshair, MapPin, Navigation } from "lucide-react";
-import { Gate } from "../../access";
+import { Capability, Gate } from "../../access";
 import { useCurrentLocationAsOrigin } from "../../hooks/useCurrentLocationAsOrigin";
 import { useT } from "../../i18n";
 import { useMapStore } from "../../map/MapContext";
@@ -72,7 +72,7 @@ export function SearchPanel() {
                 </IconButton>
             </div>
 
-            <Gate capability="location.current">
+            <Gate capability={Capability.CURRENT_LOCATION}>
                 {setCurrentLocationAsOrigin && (
                     <button type="button" className="pm-quick-chip" onClick={setCurrentLocationAsOrigin}>
                         <Crosshair size={14} aria-hidden="true" />

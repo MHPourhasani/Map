@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AlertTriangle, Loader2, RefreshCw, Route } from "lucide-react";
-import { Gate, useAccess } from "../../access";
+import { Capability, Gate, useAccess } from "../../access";
 import { useActiveRoute } from "../../hooks/useActiveRoute";
 import { useT } from "../../i18n";
 import { useTrip } from "../../state/TripContext";
@@ -37,7 +37,7 @@ export function RouteSummary() {
 
     if (origin === null || destination === null) return null;
 
-    const canSeeDuration = can("route.duration");
+    const canSeeDuration = can(Capability.ROUTE_DURATION);
     const state = query.isError ? "error" : routes.length > 0 ? "ready" : query.isPending ? "loading" : "empty";
 
     return (
@@ -131,11 +131,11 @@ export function RouteSummary() {
                             </div>
                         )}
 
-                        <Gate capability="route.endpointDetails">
+                        <Gate capability={Capability.ROUTE_ENDPOINT_DETAILS}>
                             <EndpointDetails origin={origin} destination={destination} />
                         </Gate>
 
-                        <Gate capability="route.legs">
+                        <Gate capability={Capability.ROUTE_LEGS}>
                             <RouteLegs key={activeRoute.id} route={activeRoute} />
                         </Gate>
 
