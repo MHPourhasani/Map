@@ -9,7 +9,7 @@
         "typecheck": "tsc -b",
         "lint": "eslint .",
         "preview": "vite preview",
-        "prettier": "prettier . --write",
+        "prettier": "prettier . --check --cache --write",
         "prettier:check": "prettier . --check"
     },
     "dependencies": {
@@ -17,6 +17,8 @@
         "lucide-react": "^1.55.0",
         "maplibre-gl": "^5.24.0",
         "motion": "^14.1.0",
+        "i18next": "^25.5.2",
+        "react-i18next": "^15.6.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0"
     },

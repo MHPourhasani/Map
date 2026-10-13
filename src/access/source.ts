@@ -21,7 +21,7 @@ function parseSession(raw: string): AuthSession | null {
 export const localSessionSource: AuthSource = {
     read() {
         try {
-            const raw = window.localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(STORAGE_KEY);
             return raw ? parseSession(raw) : null;
         } catch {
             // Storage is unavailable (private mode): treat as logged out
@@ -30,8 +30,8 @@ export const localSessionSource: AuthSource = {
     },
     write(session) {
         try {
-            if (session) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-            else window.localStorage.removeItem(STORAGE_KEY);
+            if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+            else localStorage.removeItem(STORAGE_KEY);
         } catch {
             // Storage is unavailable: the in-memory session still works
         }

@@ -3,6 +3,9 @@ export const fa = {
     "app.tagline": "جستجو، مسیریابی و موقعیت فعلی",
     "map.regionLabel": "نقشه تعاملی ایران",
 
+    "language.label": "زبان",
+    "language.switch": "تغییر زبان رابط",
+
     "search.origin.label": "مبدأ",
     "search.origin.placeholder": "مبدأ را جستجو کنید",
     "search.destination.label": "مقصد",

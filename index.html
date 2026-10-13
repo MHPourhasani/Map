@@ -12,6 +12,20 @@
     </head>
     <body>
         <div id="root"></div>
+        <script>
+            // Apply the saved interface language before React mounts to avoid a wrong-direction flash.
+            (function () {
+                try {
+                    var lang = localStorage.getItem("pm.ui-language");
+                    if (lang === "fa" || lang === "en") {
+                        document.documentElement.lang = lang;
+                        document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+                    }
+                } catch (e) {
+                    /* storage unavailable: keep the default Persian/RTL markup */
+                }
+            })();
+        </script>
         <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>

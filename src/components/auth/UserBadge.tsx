@@ -5,6 +5,7 @@ import { useT } from "../../i18n";
 import { useGeolocation } from "../../state/GeolocationContext";
 import { useTrip } from "../../state/TripContext";
 import { cn } from "../../utils/cn";
+import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 
 /** Shows the signed-in user and tier. Logging out also wipes the trip, location and cached results */
 export function UserBadge() {
@@ -28,6 +29,7 @@ export function UserBadge() {
                 {session?.username}
             </span>
             <strong className={cn("pm-access__badge", `is-${level}`)}>{t(`access.level.${level}`)}</strong>
+            <LanguageSwitcher />
             <button
                 type="button"
                 className="pm-icon-btn pm-access__logout"
