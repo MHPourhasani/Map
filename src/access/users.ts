@@ -12,7 +12,6 @@ export const LOCAL_ACCOUNTS: readonly LocalAccount[] = [
     { username: "user-basic", password: "1234", level: AccessLevel.BASIC },
     { username: "user-standard", password: "1234", level: AccessLevel.STANDARD },
     { username: "user-vip", password: "1234", level: AccessLevel.VIP },
-    { username: "user-vip2p", password: "1234", level: AccessLevel.VIP },
 ] as const;
 
 export interface AuthSession {
