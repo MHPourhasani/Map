@@ -1080,6 +1080,11 @@
     transform: scale(0.98);
 }
 
+.pm-login__submit:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .pm-login__hint {
     padding: 0.65rem 0.75rem;
     font-size: 0.74rem;

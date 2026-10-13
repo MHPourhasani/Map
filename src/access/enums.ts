@@ -1,8 +1,3 @@
-/**
- * Access tiers are ordered from least to most privileged.
- * Declared as const objects (+ union types) rather than `enum` so the module stays
- * compatible with Node's type-stripping test runner.
- */
 export const AccessLevel = {
     BASIC: "basic",
     STANDARD: "standard",
@@ -10,7 +5,6 @@ export const AccessLevel = {
 } as const;
 export type AccessLevel = (typeof AccessLevel)[keyof typeof AccessLevel];
 
-/** Feature-level permissions. Components should check these, not access tiers. */
 export const Capability = {
     MAP_VIEW: "map.view",
     PLACES_SELECT: "places.select",

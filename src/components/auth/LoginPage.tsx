@@ -64,7 +64,7 @@ export function LoginPage() {
                     </p>
                 )}
 
-                <button type="submit" className="pm-login__submit">
+                <button type="submit" disabled={!username || !password} className="pm-login__submit">
                     <LogIn size={16} aria-hidden="true" />
                     {t("auth.submit")}
                 </button>
